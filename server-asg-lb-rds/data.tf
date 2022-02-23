@@ -7,20 +7,15 @@ data "terraform_remote_state" "network-config" {
   }
 }
 
-data "aws_ami" "ubuntu" {
+data "aws_ami" "amazon_linux_2" {
   most_recent = true
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+    values = ["amzn2-ami-hvm*"]
   }
 
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  owners = ["099720109477"] # Canonical
+  owners = ["amazon"] # Amazon Linux
 }
 
 # Below is the policy document which autoscaling and EC2 instance will assume
@@ -34,6 +29,17 @@ data "aws_iam_policy_document" "ec2_assume_role_policy" {
       type        = "Service"
       identifiers = ["ec2.amazonaws.com", "autoscaling.amazonaws.com"]
     }
+  }
+}
+
+# This data resource will setup the user data
+data "template_file" "user_data" {
+  template = file("./user_data.tpl")
+  vars = {
+    db_username      = "mysqluser"
+    db_user_password = jsondecode(data.aws_secretsmanager_secret_version.secret_version.secret_string)["MyPassword"]
+    db_name          = "demodb"
+    db_RDS           = module.db.db_instance_endpoint
   }
 }
 

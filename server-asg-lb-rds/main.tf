@@ -25,17 +25,13 @@ module "asg" {
   use_lc    = true
   create_lc = true
 
-  image_id                    = data.aws_ami.ubuntu.id
+  image_id                    = data.aws_ami.amazon_linux_2.id
   instance_type               = "t2.micro"
   associate_public_ip_address = false
   security_groups             = [module.web_server_sg.security_group_id]
   iam_instance_profile_name   = aws_iam_instance_profile.session_manager_access.name
 
-  user_data = <<-EOF
-  #!/bin/bash
-  sudo apt update -y
-  sudo apt install apache2 -y
-  EOF
+  user_data = data.template_file.user_data.rendered
 
   tags = [
     {
