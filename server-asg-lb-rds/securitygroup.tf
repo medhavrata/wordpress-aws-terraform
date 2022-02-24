@@ -3,7 +3,7 @@
 # #########################################################################################################################
 
 module "web_server_sg" {
-  source = "terraform-aws-modules/security-group/aws//modules/http-80"
+  source = "terraform-aws-modules/security-group/aws"
 
   name        = "web-server"
   description = "Security group for web-server with HTTP ports open within VPC"
@@ -11,25 +11,32 @@ module "web_server_sg" {
 
   ingress_cidr_blocks = [data.terraform_remote_state.network-config.outputs.vpc_cidr_blocks]
 
-  # ingress_with_cidr_blocks = [
-  #   {
-  #     from_port   = 443
-  #     to_port     = 443
-  #     protocol    = "tcp"
-  #     description = "HTTPS"
-  #     cidr_blocks = data.terraform_remote_state.network-config.outputs.vpc_cidr_blocks
-  #   },
-  # ]
+  ingress_with_cidr_blocks = [
+    {
+      from_port   = 443
+      to_port     = 443
+      protocol    = "tcp"
+      description = "HTTPS"
+      cidr_blocks = data.terraform_remote_state.network-config.outputs.vpc_cidr_blocks
+    },
+    {
+      from_port   = 80 # Medha
+      to_port     = 80
+      protocol    = "tcp"
+      description = "HTTP"
+      cidr_blocks = data.terraform_remote_state.network-config.outputs.vpc_cidr_blocks
+    },
+  ]
 
-  # egress_with_cidr_blocks = [
-  #   {
-  #     from_port   = 0
-  #     to_port     = 0
-  #     protocol    = "-1"
-  #     cidr_blocks = "0.0.0.0/0"
-  #   },
-  # ]
-  
+  egress_with_cidr_blocks = [
+    {
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
+      cidr_blocks = "0.0.0.0/0"
+    },
+  ]
+
 }
 
 ###########################################################################################################################

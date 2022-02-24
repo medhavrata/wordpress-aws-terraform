@@ -63,40 +63,51 @@ module "alb" {
 
   name = "wordpress-alb"
 
-  load_balancer_type = "application"
+  # load_balancer_type = "application"
+  load_balancer_type = "network" # Medha
 
-  vpc_id          = data.terraform_remote_state.network-config.outputs.vpc_id
-  subnets         = data.terraform_remote_state.network-config.outputs.public_subnets
-  security_groups = [module.elb_sg.security_group_id]
+  vpc_id  = data.terraform_remote_state.network-config.outputs.vpc_id
+  subnets = data.terraform_remote_state.network-config.outputs.public_subnets
+  # security_groups = [module.elb_sg.security_group_id] #Medha
 
   target_groups = [
     {
-      name_prefix      = "pref-"
-      backend_protocol = "HTTPS"
-      backend_port     = 443
-      target_type = "instance"
+      name_prefix = "pref-"
+      # backend_protocol = "HTTPS"
+      backend_protocol = "TCP" # Medha
+      # backend_port     = 443
+      backend_port = 80 # Medha
+      target_type  = "instance"
+      # matcher      = "200,302" # Medha
+      status_code = "HTTP_302" # Medha
     }
   ]
 
   https_listeners = [
     {
-      port               = 443
-      protocol           = "HTTPS"
+      port = 443
+      # protocol           = "HTTPS"
+      protocol           = "TLS" # Medha
       certificate_arn    = aws_acm_certificate_validation.cloud99_cert_val.certificate_arn
       target_group_index = 0
+      status_code        = "HTTP_302" # Medha
     }
   ]
 
   http_tcp_listeners = [
     {
-      port               = 80
-      protocol           = "HTTP"
-      action_type = "redirect"
-      redirect = {
-        port = "443"
-        protocol = "HTTPS"
-        status_code = "HTTP_302"
-      }
+      port = 80
+      # protocol    = "HTTP"
+      protocol    = "TCP" # Medha
+      # action_type = "redirect" # Medha
+      # Medha starts
+      # redirect = {
+      #   port = "443"
+      #   # protocol    = "HTTPS"
+      #   protocol    = "HTTPS" # Medha
+      #   status_code = "HTTP_302"
+      # }
+      # Medha ends
     }
   ]
 
