@@ -31,7 +31,14 @@ module "asg" {
   security_groups             = [module.web_server_sg.security_group_id]
   iam_instance_profile_name   = aws_iam_instance_profile.session_manager_access.name
 
-  user_data = data.template_file.user_data.rendered
+  user_data = templatefile("./user_data.tftpl",
+    {
+      db_username      = "mysqluser"
+      db_user_password = jsondecode(data.aws_secretsmanager_secret_version.secret_version.secret_string)["MyPassword"]
+      db_name          = "demodb"
+      db_RDS           = module.db.db_instance_endpoint
+    }
+  )
 
   tags = [
     {
@@ -65,8 +72,9 @@ module "alb" {
   target_groups = [
     {
       name_prefix      = "pref-"
-      backend_protocol = "HTTP"
-      backend_port     = 80
+      backend_protocol = "HTTPS"
+      backend_port     = 443
+      target_type = "instance"
     }
   ]
 
@@ -83,7 +91,12 @@ module "alb" {
     {
       port               = 80
       protocol           = "HTTP"
-      target_group_index = 0
+      action_type = "redirect"
+      redirect = {
+        port = "443"
+        protocol = "HTTPS"
+        status_code = "HTTP_302"
+      }
     }
   ]
 
@@ -101,10 +114,11 @@ module "db" {
 
   identifier = "mysql-db"
 
-  engine            = "mysql"
-  engine_version    = "5.7.19"
-  instance_class    = "db.t2.micro"
-  allocated_storage = 5
+  engine              = "mysql"
+  engine_version      = "5.7.19"
+  instance_class      = "db.t2.micro"
+  allocated_storage   = 5
+  skip_final_snapshot = true
 
   name     = "demodb"
   username = "mysqluser"
