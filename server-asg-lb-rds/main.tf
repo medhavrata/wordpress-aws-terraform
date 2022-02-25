@@ -15,6 +15,7 @@ module "asg" {
   health_check_type         = "ELB"
   vpc_zone_identifier       = data.terraform_remote_state.network-config.outputs.private_subnets
   target_group_arns         = module.alb.target_group_arns
+  # http_tcp_listener_arns = module.alb.http_tcp_listener_arns # Medha
 
 
   # Launch template
@@ -77,9 +78,9 @@ module "alb" {
       backend_protocol = "TCP" # Medha
       # backend_port     = 443
       backend_port = 80 # Medha
-      target_type  = "instance"
+      target_type  = "ip"
       # matcher      = "200,302" # Medha
-      status_code = "HTTP_302" # Medha
+      # status_code = "HTTP_302" # Medha
     }
   ]
 
@@ -90,7 +91,7 @@ module "alb" {
       protocol           = "TLS" # Medha
       certificate_arn    = aws_acm_certificate_validation.cloud99_cert_val.certificate_arn
       target_group_index = 0
-      status_code        = "HTTP_302" # Medha
+      # status_code        = "HTTP_302" # Medha
     }
   ]
 
@@ -98,7 +99,8 @@ module "alb" {
     {
       port = 80
       # protocol    = "HTTP"
-      protocol    = "TCP" # Medha
+      protocol           = "TCP" # Medha
+      target_group_index = 0     # Medha
       # action_type = "redirect" # Medha
       # Medha starts
       # redirect = {
