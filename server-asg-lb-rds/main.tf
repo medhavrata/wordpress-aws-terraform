@@ -74,10 +74,10 @@ module "alb" {
   target_groups = [
     {
       name_prefix = "pref-"
-      backend_protocol = "HTTPS"
+      backend_protocol = "HTTP"
       # backend_protocol = "TCP" # Medha
-      backend_port     = 443
-      # backend_port = 80 # Medha
+      # backend_port     = 443
+      backend_port = 80 # Medha
       target_type  = "instance"
       # matcher      = "200,302" # Medha
       status_code = "HTTP_302" # Medha
