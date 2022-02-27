@@ -103,14 +103,12 @@ module "alb" {
       # protocol           = "TCP"      # Medha
       target_group_index = 0          # Medha
       action_type        = "redirect" # Medha
-      # Medha starts
       redirect = {
         port = "443"
         # protocol    = "HTTPS"
         protocol    = "HTTPS" # Medha
         status_code = "HTTP_302"
       }
-      # Medha ends
     }
   ]
 
