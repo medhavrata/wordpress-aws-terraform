@@ -78,8 +78,8 @@ module "alb" {
       backend_protocol = "TCP" # Medha
       # backend_port     = 443
       backend_port = 80 # Medha
-      # target_type  = "instance"
-      target_type = "alb" # Medha
+      target_type  = "instance"
+      # target_type = "alb" # Medha
       # matcher      = "200,302" # Medha
       status_code = "HTTP_302" # Medha
     }
