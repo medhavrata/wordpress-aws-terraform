@@ -74,41 +74,32 @@ module "alb" {
   target_groups = [
     {
       name_prefix = "pref-"
-      # backend_protocol = "HTTP"
-      backend_protocol = "TCP" # Medha
-      # backend_port     = 443
+      backend_protocol = "HTTP"
       backend_port = 80 # Medha
-      target_type  = "instance"
-      # target_type = "alb" # Medha
-      # matcher      = "200,302" # Medha
-      status_code = "HTTP_302" # Medha
+      health_check = {
+        matcher = "200,302"
+      }
     }
   ]
 
   https_listeners = [
     {
-      port     = 443
+      port = 443
       protocol = "HTTPS"
-      # protocol           = "TLS" # Medha
-      certificate_arn    = aws_acm_certificate_validation.cloud99_cert_val.certificate_arn
+      certificate_arn = aws_acm_certificate_validation.cloud99_cert_val.certificate_arn
       target_group_index = 0
-      status_code        = "HTTP_302" # Medha
+      status_code = "HTTP_302"
+      health_check = {
+        matcher = "200,302"
+      }
     }
   ]
 
   http_tcp_listeners = [
     {
-      port     = 80
-      protocol = "HTTP"
-      # protocol           = "TCP"      # Medha
-      target_group_index = 0          # Medha
-      action_type        = "redirect" # Medha
-      redirect = {
-        port = "443"
-        # protocol    = "HTTPS"
-        protocol    = "HTTPS" # Medha
-        status_code = "HTTP_302"
-      }
+      port               = 80
+      protocol           = "HTTP"
+      target_group_index = 0
     }
   ]
 
