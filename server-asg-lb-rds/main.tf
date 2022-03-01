@@ -82,6 +82,19 @@ module "alb" {
     }
   ]
 
+  https_listeners = [
+    {
+      port = 443
+      protocol = "HTTPS"
+      certificate_arn = aws_acm_certificate_validation.cloud99_cert_val.certificate_arn
+      target_group_index = 0
+      status_code = "HTTP_302"
+      health_check = {
+        matcher = "200,302"
+      }
+    }
+  ]
+
   http_tcp_listeners = [
     {
       port               = 80
